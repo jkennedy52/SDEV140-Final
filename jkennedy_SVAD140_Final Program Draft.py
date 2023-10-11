@@ -12,47 +12,170 @@
 ##Record timestamps of when a memeber checked in our out
 
 
-import tkinter as tk
+import tkinter as tk ##for gui
 
+from datetime import datetime ##for timestamp
+
+##defining main window
 window = tk.Tk()
+window.title("Club Member Tracker")
+window.rowconfigure(0, minsize=300, weight=1)
+window.columnconfigure(1, minsize=300, weight=1)
+window.resizable(width=False, height=False)
+window.geometry(f"+0+0")
 
-main_frm = tk.Frame(width=50)
-wel_label = tk.Label(text="Welcome to the Club Kid Tracker")
-wel_label.pack()
 
-btn_Check_in = tk.Button(
-    text="CHECK IN",
-    height=3)
-btn_Check_in.pack(fill=tk.X)
+##Defining variable information type
+##fname = str()  ##First Name
+##lname = str()  ##Last Name
+##pin = int()    ##Members pin number
+##tstamp = str() ##Last time stamp
+statecheck = False  ##Will show if member is checked in (true) or out(false)
+fnames = []
+lnames = []
+pins = []
+timestamps = []
+checks= []
 
-btn_Check_out = tk.Button(
-    text="CHECK OUT",
-    height=3)
-btn_Check_out.pack(fill=tk.X)
+##Creating Button Actions
+def create():
+    name1 = str(fname.get())
+    name2 = str(lname.get())
+    pin1 = str(pin.get())
+    fnames.append(name1)
+    lnames.append(name2)
+    pins.append(pin1)
+    timestamps.append(datetime.now())
+    checks.append(False)
+    lname.delete(0, tk.END)
+    fname.delete(0, tk.END)
+    pin.delete(0, tk.END)
+    
+def checkin():
+    pincheck = str(pin.get())
+    for i in range(len(fnames)):
+        if pincheck == pins[i]:
+            if checks[i] != True:
+                fname.insert(0, fnames[i])
+                lname.insert(0,lnames[i])
+                timestamps[i] = datetime.now()
+                tstamp.config(text = timestamps[i])
+                statecheck = True
+                checks[i] = statecheck
+                state.config(text="Checked In")
+            else:
+                state.config(text="Already checked in!")
+def checkout():
+    pincheck = str(pin.get())
+    for i in range(len(fnames)):
+        if pincheck == pins[i]:
+            if checks[i] != False:
+                fname.insert(0, fnames[i])
+                lname.insert(0,lnames[i])
+                timestamps[i] = datetime.now()
+                tstamp.config(text = timestamps[i])
+                statecheck = False
+                checks[i] = statecheck
+                state.config(text="Checked Out")
+            else:
+                state.config(text="Not Checked In")    
+def current_attendance():
+    print() ##using this as a placeholder so the red goes away 
 
-btn_current_attendance = tk.Button(
-    text="CURRENT ATTENDANCE",
-    height=3)
-btn_current_attendance.pack(fill=tk.X)
 
-btn_create_member = tk.Button(
+def clear_text():
+    lname.delete(0,'end')
+    fname.delete(0,'end')
+    pin.delete(0,'end')
+    tstamp.config(text="")
+    state.config(text="")
+      
+##Start of the button side of our program
+frm_btn = tk.Frame(master=window, relief=tk.RAISED)
+
+btn_create_member = tk.Button(master=frm_btn,
     text="CREATE MEMBER",
-    height=3)
-main_frm.pack()
+    height=3,
+     command=create)
 
-btn_create_member.pack(fill=tk.X)
-btm_frm = tk.Frame(height=20)
-btm_frm.pack()
+btn_Check_in = tk.Button(master=frm_btn,
+    text="CHECK IN",
+    height=3,
+    command=checkin)
 
-member = str()
-##member.fname()
-##member.lname()
-##member.pin()
-##member.checkedin()
-##member.timestamp()
+btn_Check_out = tk.Button(master=frm_btn,
+    text="CHECK OUT",
+    height=3,
+    command=checkout)
 
-##def check_in():
-##def check_out():
-##def current_attendance():
-##def create_member():
+btn_current_attendance = tk.Button(master=frm_btn,
+    text="CURRENT ATTENDANCE",
+    height=3,
+    command=current_attendance)
+
+btn_clear = tk.Button(master=frm_btn,
+                      text="CLEAR SCREEN",
+                      height=3,
+                      command=clear_text)
+
+##line it all up
+btn_create_member.grid(row=0, column = 0, padx=5,pady=5, sticky = "nesw")
+btn_Check_in.grid(row=1, column=0, padx=5, pady=5, sticky = "nesw")
+btn_Check_out.grid(row=2, column=0, padx=5, pady=5, sticky = "nesw")
+btn_current_attendance.grid(row=3, column=0, padx=5, pady=5, sticky = "nesw")
+btn_clear.grid(row=4, column=0, padx=5, pady=5, sticky = "nesw")
+frm_btn.grid(row=0, column=0, padx=5, pady=5, sticky ="n")
+
+##End of button side of program
+
+##Start of Display side of the program
+frm_display = tk.Frame(master=window, relief="sunken")
+dir_label = tk.Label(master=frm_display, text="Welcome to the Club Member Tracker!", pady=10 )
+fname_label = tk.Label(master=frm_display, text="First Name", width=10)
+fname = tk.Entry(master=frm_display, text="", width = 30)
+lname_label = tk.Label(master=frm_display, text="Last Name", width=10)
+lname = tk.Entry(master=frm_display, text="", width = 30)
+pin_label = tk.Label(master=frm_display, text="Pin", width=10)
+pin = tk.Entry(master=frm_display, text="", width = 30)
+tstamp_label = tk.Label(master=frm_display, text="Last Stamp", width=10)
+tstamp = tk.Label(master=frm_display, text="null", width = 30)
+state_label = tk.Label(master=frm_display, text="Status", width=10)
+state = tk.Label(master=frm_display, text="null", width = 30)
+
+dir_label.grid(row=0, column=1, columnspan=2, sticky="nesw")
+fname_label.grid(row=1,column=1, pady=5, padx=5)
+fname.grid(row=1, column=2, pady=5)
+lname_label.grid(row=2, column=1, padx=5, pady=5)
+lname.grid(row=2, column=2, pady=5)
+pin_label.grid(row=3, column=1, padx=5, pady=5)
+pin.grid(row=3, column=2, pady=5)
+tstamp_label.grid(row=4, column=1, padx=5, pady=5)
+tstamp.grid(row=4, column=2, pady=5)
+state_label.grid(row=5, column=1, padx=5, pady=5)
+state.grid(row=5, column=2, pady=5)
+frm_display.grid(row=0, column=1, padx=5, pady=5, sticky="n")
+
+
+##Directions Window
+window2 = tk.Toplevel(window)
+window2.title("Club Member Tracker")
+
+window2.geometry(f"+480+0")
+
+
+window2.title("Tracker Directions")
+directions_label = tk.Label(master=window2, text="Please follow the directions below: ", pady=10)
+
+directions_text = tk.Text(window2, wrap=tk.WORD, width=150, height=7, bd=0)
+directions_label.pack()
+directions_text.pack()
+directions = """
+1. If you would like to create a new member enter the information into the boxes and then click the create member button. 
+2. If you would like to check a member in then enter the members unique pin and click the check in button.
+3. If you would like to check a member out enter the members unique pin and click the check out button.
+4. If you would like to check the current members that are checked in click the current attendance button and you will see the list.
+5. Make sure after each action that you click the clear button to make sure you are working with clean information.
+"""
+directions_text.insert(tk.END, directions)
+window2.focus_set()
 window.mainloop()
