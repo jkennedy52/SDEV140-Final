@@ -13,8 +13,10 @@
 
 
 import tkinter as tk ##for gui
-
+from tkinter import PhotoImage
 from datetime import datetime ##for timestamp
+from PIL import Image, ImageTk
+
 
 ##defining main window
 window = tk.Tk()
@@ -23,6 +25,10 @@ window.rowconfigure(0, minsize=300, weight=1)
 window.columnconfigure(1, minsize=300, weight=1)
 window.resizable(width=False, height=False)
 window.geometry(f"+0+0")
+
+
+##https://github.com/jkennedy52/SDEV140-Final/blob/2794b1031e117fd95200ba7db70a9acddf9863ad/green.png
+
 
 
 ##Defining variable information type
@@ -35,21 +41,46 @@ fnames = []
 lnames = []
 pins = []
 timestamps = []
-checks= []
+checks = []
+green_check = Image.open("green.png")
+red_x = Image.open("red.png")
+green_photo = ImageTk.PhotoImage(green_check)
+red_photo = ImageTk.PhotoImage(red_x)
+transparent_image = PhotoImage(width=1, height=1)
+pin_error = "Error with pin. Please try again."
+
 
 ##Creating Button Actions
 def create():
-    name1 = str(fname.get())
-    name2 = str(lname.get())
-    pin1 = str(pin.get())
-    fnames.append(name1)
-    lnames.append(name2)
-    pins.append(pin1)
-    timestamps.append(datetime.now())
-    checks.append(False)
-    lname.delete(0, tk.END)
-    fname.delete(0, tk.END)
+    name1 = fname.get()
+    name2 = lname.get()
+    pin1 = pin.get()
+
+    # Validate name and pin
+    if not name1.isalpha():
+        display_error("Invalid first name")
+    elif not name2.isalpha():
+        display_error("Invalid last name")
+    elif not (pin1.isdigit() and 0 <= int(pin1) <= 9999):
+        display_error("Invalid PIN")
+    else:
+        # Check for duplicate PIN
+        if pin1 in pins:
+            display_error("Duplicate PIN")
+        else:
+            # Data is valid, add the member
+            fnames.append(name1)
+            lnames.append(name2)
+            pins.append(pin1)
+            timestamps.append(datetime.now())
+            checks.append(False)
+            clear_text()
+            image_label.config(image=green_photo)
+            
+def display_error(message):
     pin.delete(0, tk.END)
+    pin.insert(0, message)
+    image_label.config(image=red_photo)            
     
 def checkin():
     pincheck = str(pin.get())
@@ -63,8 +94,13 @@ def checkin():
                 statecheck = True
                 checks[i] = statecheck
                 state.config(text="Checked In")
+                image_label.config(image=green_photo)
             else:
                 state.config(text="Already checked in!")
+                image_label.config(image=red_photo)
+        else:
+            display_error("Invalid PIN")
+                
 def checkout():
     pincheck = str(pin.get())
     for i in range(len(fnames)):
@@ -77,18 +113,35 @@ def checkout():
                 statecheck = False
                 checks[i] = statecheck
                 state.config(text="Checked Out")
+                image_label.config(image=green_photo)
             else:
-                state.config(text="Not Checked In")    
+                state.config(text="Not Checked In")
+                image_label.config(image=red_photo)
+        else:
+            display_error("Invalid PIN")
+              
+                  
 def current_attendance():
-    print() ##using this as a placeholder so the red goes away 
-
+    window3 = tk.Tk()
+    window3.title("Club Member Current Attendance")
+    window3.resizable(width=False, height=False)
+    window3.geometry(f"+480+200") 
+    for i in range(len(fnames)):
+        if checks[i] != False:
+            att = tk.Label(master=window3, text=(fnames[i],lnames[i],timestamps[i]))
+            att.grid(row=i, column=0, padx=1, pady=1)
+    window.mainloop()
+    
+        
 
 def clear_text():
-    lname.delete(0,'end')
-    fname.delete(0,'end')
-    pin.delete(0,'end')
+    lname.delete(0,tk.END)
+    fname.delete(0, tk.END)
+    pin.delete(0, tk.END)
     tstamp.config(text="")
     state.config(text="")
+    image_label.config(image=transparent_image)
+        
       
 ##Start of the button side of our program
 frm_btn = tk.Frame(master=window, relief=tk.RAISED)
@@ -141,6 +194,7 @@ tstamp_label = tk.Label(master=frm_display, text="Last Stamp", width=10)
 tstamp = tk.Label(master=frm_display, text="null", width = 30)
 state_label = tk.Label(master=frm_display, text="Status", width=10)
 state = tk.Label(master=frm_display, text="null", width = 30)
+image_label = tk.Label(master=window)
 
 dir_label.grid(row=0, column=1, columnspan=2, sticky="nesw")
 fname_label.grid(row=1,column=1, pady=5, padx=5)
@@ -153,6 +207,7 @@ tstamp_label.grid(row=4, column=1, padx=5, pady=5)
 tstamp.grid(row=4, column=2, pady=5)
 state_label.grid(row=5, column=1, padx=5, pady=5)
 state.grid(row=5, column=2, pady=5)
+image_label.grid(row=6, columnspan=2, pady=5)
 frm_display.grid(row=0, column=1, padx=5, pady=5, sticky="n")
 
 
@@ -170,7 +225,8 @@ directions_text = tk.Text(window2, wrap=tk.WORD, width=150, height=7, bd=0)
 directions_label.pack()
 directions_text.pack()
 directions = """
-1. If you would like to create a new member enter the information into the boxes and then click the create member button. 
+1. If you would like to create a new member enter the information into the boxes and then click the create member button.
+    a. Pins need to be unique and a number between 0000 and 9999.
 2. If you would like to check a member in then enter the members unique pin and click the check in button.
 3. If you would like to check a member out enter the members unique pin and click the check out button.
 4. If you would like to check the current members that are checked in click the current attendance button and you will see the list.
